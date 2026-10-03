@@ -75,6 +75,15 @@ class TransactionReader {
   }
 }
 
+/** Why a file or row can't be used, without listing all 29 columns when none match. */
+export function describeMissing(source: string, missing: string[], features: string[]): string {
+  if (missing.length === features.length) {
+    return `${source} doesn't look like transaction data: it needs a header row with V1 to V28 and Amount.`;
+  }
+  const shown = missing.length > 5 ? `${missing.slice(0, 5).join(", ")} and ${missing.length - 5} more` : missing.join(", ");
+  return `${source} is missing these columns: ${shown}.`;
+}
+
 /** Parse pasted CSV text; accepts a header row or creditcard.csv column order. */
 export function parseTransactions(text: string, features: string[]): ParseResult {
   const reader = new TransactionReader(features);

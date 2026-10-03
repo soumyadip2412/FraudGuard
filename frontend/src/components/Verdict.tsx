@@ -1,7 +1,10 @@
 import type { ReactNode } from "react";
+import { featureLadder } from "../lib/explanation";
 import { formatPercent } from "../lib/format";
 import type { Prediction } from "../types";
 import { EvidenceLadder } from "./EvidenceLadder";
+import { ExplanationSummary } from "./ExplanationSummary";
+import { TechnicalDetails } from "./TechnicalDetails";
 
 type Standing = "flagged" | "borderline" | "clear";
 
@@ -33,22 +36,36 @@ interface VerdictProps {
 export function Verdict({ prediction, headingLevel = "h2", children }: VerdictProps) {
   const standing = standingOf(prediction);
   const Heading = headingLevel;
-  const { base_value, top_features } = prediction;
+  const { explanation } = prediction;
 
   return (
     <section className={`verdict is-${standing}`}>
       <Heading className="verdict-headline">{HEADLINES[standing]}</Heading>
       <p className="verdict-summary">{summaryOf(prediction, standing)}</p>
-      {base_value !== null && top_features && (
+      {explanation ? (
         <>
-          <EvidenceLadder input={{ ...prediction, base_value, top_features }} />
-          <p className="ladder-key">
-            Starting from a typical transaction, each row moves the score toward fraud (gold) or away from it (gray).
-            V1 to V28 are features the card issuer anonymised before sharing the data.
-          </p>
+          <ExplanationSummary prediction={prediction} explanation={explanation} headingLevel={headingLevel === "h2" ? "h3" : "h4"} />
+          <TechnicalDetails prediction={prediction} explanation={explanation} />
         </>
+      ) : (
+        <FeatureFallback prediction={prediction} />
       )}
       {children}
     </section>
+  );
+}
+
+/** Responses without an explanation object (older API, older log entries) keep the per-feature view. */
+function FeatureFallback({ prediction }: { prediction: Prediction }) {
+  const ladder = featureLadder(prediction);
+  if (!ladder) return null;
+  return (
+    <>
+      <EvidenceLadder input={ladder} />
+      <p className="ladder-key">
+        Starting from a typical transaction, each row moves the score toward fraud (gold) or away from it (gray). V1 to V28
+        are anonymised characteristics; their real-world meanings aren't available.
+      </p>
+    </>
   );
 }

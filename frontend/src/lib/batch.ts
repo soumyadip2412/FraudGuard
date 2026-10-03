@@ -23,19 +23,25 @@ export function tally(rows: ScoredRow[]): Tally {
   return t;
 }
 
-/** The n highest-probability rows, in one pass instead of sorting every row. */
-export function topRisks(rows: ScoredRow[], n: number): ScoredRow[] {
-  const top: ScoredRow[] = [];
-  for (const row of rows) {
-    if (top.length === n && row.probability <= top[n - 1].probability) continue;
-    const at = top.findIndex((other) => row.probability > other.probability);
-    top.splice(at === -1 ? top.length : at, 0, row);
+// Rows shown in the results table, and the only rows whose reasons are fetched.
+export const TOP_RISKS = 25;
+
+/** Indices of the n highest-probability rows, in one pass instead of sorting every row. */
+export function topIndices(rows: ScoredRow[], n: number): number[] {
+  const top: number[] = [];
+  rows.forEach((row, index) => {
+    if (top.length === n && row.probability <= rows[top[n - 1]].probability) return;
+    const at = top.findIndex((other) => row.probability > rows[other].probability);
+    top.splice(at === -1 ? top.length : at, 0, index);
     if (top.length > n) top.pop();
-  }
+  });
   return top;
 }
 
+export const topRisks = (rows: ScoredRow[], n: number) => topIndices(rows, n).map((index) => rows[index]);
+
 export function downloadCsv(result: BatchResult) {
+  // Scores only: reasons exist just for the riskiest rows shown on screen.
   const columns = (r: ScoredRow) => [r.line, r.amount, r.probability, r.flagged ? 1 : 0, ...(result.hasLabels ? [r.label ?? ""] : [])];
   const header = ["row", "amount", "fraud_probability", "flagged", ...(result.hasLabels ? ["class"] : [])].join(",");
   const body = result.rows.map((row) => columns(row).join(",")).join("\n");

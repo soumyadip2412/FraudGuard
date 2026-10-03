@@ -474,11 +474,17 @@ textarea {
 }
 
 .paste-row summary {
-  cursor: pointer;
-  font-weight: 500;
-  text-decoration: underline;
-  text-underline-offset: 0.2em;
+  list-style: none;
   width: fit-content;
+}
+
+.paste-row summary::-webkit-details-marker {
+  display: none;
+}
+
+.paste-row[open] summary {
+  background: var(--black);
+  color: var(--white);
 }
 
 .paste-row[open] {
@@ -1050,4 +1056,254 @@ textarea {
   .ledger td {
     padding-inline: 0.5rem;
   }
+}
+
+/* ---------- Guide ---------- */
+
+.guide .section-title {
+  margin-top: 2.5rem;
+}
+
+/* Numbered only where the content is a real sequence of steps. */
+.steps {
+  counter-reset: step;
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  max-width: 68ch;
+}
+
+.steps li {
+  counter-increment: step;
+  position: relative;
+  padding: 0 0 0.85rem 2.5rem;
+}
+
+.steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: -0.15rem;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  border: 1.5px solid var(--black);
+  border-radius: 50%;
+  font: 600 var(--step-0) / 1 var(--font-display);
+}
+
+.terms {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+  max-width: 68ch;
+}
+
+.terms div {
+  border-left: 2px solid var(--pewter);
+  padding-left: 1rem;
+}
+
+.terms dt {
+  font-weight: 600;
+}
+
+.guide-list {
+  padding-left: 1.25rem;
+}
+
+.guide-list li + li {
+  margin-top: 0.4rem;
+}
+
+.guide-figure {
+  background: var(--white);
+  border: 1px solid var(--pewter);
+  border-radius: var(--radius-panel);
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.swatch {
+  padding: 0 0.35em;
+  border-radius: 2px;
+  font-weight: 600;
+}
+
+.swatch-up {
+  background: var(--gold-leaf);
+  color: var(--black);
+}
+
+.swatch-down {
+  background: var(--bar-gray);
+  color: var(--black);
+}
+
+/* ---------- Choosing a transaction ---------- */
+
+.other-sources {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.other-sources .paste-row[open] {
+  flex-basis: 100%;
+}
+
+.advanced {
+  border-top: 1px solid var(--pewter);
+  padding-top: 1rem;
+}
+
+.advanced > summary,
+.technical > summary,
+.technical-nested > summary {
+  cursor: pointer;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.advanced[open] > summary {
+  margin-bottom: 0.75rem;
+}
+
+.advanced .hint {
+  margin-bottom: 0.75rem;
+}
+
+.field-amount label {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.field-amount .hint {
+  max-width: 52ch;
+}
+
+.tag-whatif {
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  background: var(--white);
+}
+
+.btn-inline {
+  font: inherit;
+  color: var(--black);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.whatif-note {
+  border-left: 3px solid var(--gold-leaf);
+  padding: 0.5rem 0.9rem;
+  margin-top: 1.25rem;
+  background: var(--mist);
+  max-width: 68ch;
+}
+
+/* ---------- What drove this score ---------- */
+
+.drivers-title {
+  font: 600 var(--step-1) / 1.3 var(--font-display);
+  margin-bottom: 0.75rem;
+}
+
+.drivers-list {
+  display: grid;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.driver {
+  border-left: 2px solid var(--pewter);
+  padding-left: 1rem;
+  max-width: 68ch;
+}
+
+.driver dt {
+  font-weight: 600;
+}
+
+.driver-effect {
+  font-weight: 500;
+}
+
+.driver .hint {
+  margin-top: 0.15rem;
+}
+
+/* ---------- Technical details ---------- */
+
+.technical {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--pewter);
+  padding-top: 1rem;
+}
+
+.technical[open] {
+  display: grid;
+  gap: 1rem;
+}
+
+.technical .table-scroll {
+  margin-top: 0;
+}
+
+.tech-facts {
+  display: grid;
+  grid-template-columns: max-content minmax(0, 1fr);
+  gap: 0.35rem 1rem;
+  font-size: var(--step--1);
+}
+
+.tech-facts dt {
+  font-weight: 600;
+  color: var(--slate);
+}
+
+@media (max-width: 559px) {
+  .tech-facts {
+    grid-template-columns: 1fr;
+  }
+  .tech-facts dd {
+    margin-bottom: 0.4rem;
+  }
+}
+
+.percentile-grid {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+  gap: 0.25rem 1rem;
+  font-size: var(--step--1);
+  font-variant-numeric: tabular-nums;
+}
+
+.percentile-grid span {
+  display: inline-block;
+  min-width: 3.5rem;
+  color: var(--slate);
+}
+
+.feature-list {
+  font-size: var(--step--1);
+  max-width: 68ch;
+  margin-top: 0.5rem;
+}
+
+.ledger td.reason {
+  white-space: normal;
+  min-width: 16rem;
+  font-size: var(--step--1);
 }

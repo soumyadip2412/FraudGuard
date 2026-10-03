@@ -5,6 +5,7 @@ export const TABS = [
   { id: "batch", label: "Batch" },
   { id: "log", label: "Log" },
   { id: "model", label: "Model" },
+  { id: "guide", label: "Guide" },
 ] as const;
 
 export type TabId = (typeof TABS)[number]["id"];

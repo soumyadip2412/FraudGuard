@@ -38,12 +38,29 @@ interface ValidationIssue {
   msg: string;
 }
 
+const PLAIN_MESSAGES: Record<string, string> = {
+  "Field required": "is required",
+  "Input should be greater than or equal to 0": "must be 0 or more",
+  "Input should be a valid number": "must be a number",
+  "Input should be a finite number": "must be a finite number",
+};
+
+/** "An anonymised model feature (V3) is required." Batch issues are prefixed with their row. */
+function describeIssue({ loc, msg }: ValidationIssue): string {
+  const field = String(loc.at(-1));
+  const subject = /^V\d+$/.test(field) ? `An anonymised model feature (${field})` : field === "Amount" ? "The amount" : field;
+  const plain = PLAIN_MESSAGES[msg];
+  const sentence = plain ? `${subject} ${plain}.` : `${subject}: ${msg}.`;
+  const rowAt = loc.indexOf("transactions");
+  return rowAt >= 0 && typeof loc[rowAt + 1] === "number" ? `Row ${Number(loc[rowAt + 1]) + 1}: ${sentence}` : sentence;
+}
+
 function describeError(status: number, detail: unknown): string {
   if (status === 401) return "This server requires an API key. Add it under API key in the top bar.";
   // 502/504 come from the proxy (nginx or Vite) when the API itself isn't answering.
   if (status === 502 || status === 504) return "The API stopped responding. Check that it's running, then try again.";
   if (Array.isArray(detail)) {
-    return (detail as ValidationIssue[]).map((issue) => `${issue.loc.at(-1)}: ${issue.msg}`).join("; ");
+    return (detail as ValidationIssue[]).map(describeIssue).join(" ");
   }
   if (typeof detail === "string") return detail;
   return `The server returned an unexpected error (HTTP ${status}).`;
@@ -81,8 +98,8 @@ export interface TransactionQuery {
 export const api = {
   model: () => request<ModelInfo>("/model"),
   predict: (features: Features) => request<Prediction>("/predictions", features),
-  predictBatch: (rows: Features[]) =>
-    request<Prediction[]>("/predictions/batch?explain=false", { transactions: rows }),
+  predictBatch: (rows: Features[], explain: boolean) =>
+    request<Prediction[]>(`/predictions/batch?explain=${explain}`, { transactions: rows }),
   record: (features: Features) => request<StoredTransaction>("/transactions", features),
   transactions: ({ isFraud, limit, offset }: TransactionQuery) => {
     const params = new URLSearchParams({ limit: String(limit), offset: String(offset) });

@@ -12,8 +12,12 @@ export function BatchView({ model }: { model: ModelInfo }) {
     <div className="narrow-wide">
       <h1 className="view-title">Check a file of transactions</h1>
       <p className="view-lede">
-        Upload a CSV with a header row containing V1 to V28 and Amount, like creditcard.csv. If it also has a Class
-        column, you'll see how the model's decisions compare with the real labels.
+        Score many transactions at once and see the riskiest, each with a short reason. If the file has a Class column,
+        you'll also see how the model's decisions compare with the real labels.
+      </p>
+      <p className="body-copy">
+        <strong>Technical input format:</strong> a CSV with a header row naming the model's 29 inputs, Amount and the 28
+        anonymised model features V1 to V28, exactly as in creditcard.csv. Other columns, such as Time, are ignored.
       </p>
       <BatchBody batch={batch} />
     </div>

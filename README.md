@@ -15,6 +15,7 @@ and reviewed through a web dashboard.
 - **Checks whole files**: upload a CSV (the full 284,807-row dataset scores in about 30 seconds),
   compare the decisions with real labels, and download the results.
 - **Keeps a log** of recorded transactions with the decision, threshold, and model used at the time.
+- **Explains itself**: a built-in Guide page walks through every feature and how to read a verdict.
 
 ## Model results
 
@@ -180,6 +181,16 @@ cd frontend && npm run build               # type-check and build the frontend
 ```
 
 The tests need the trained model and the dataset, and skip themselves if either is missing.
+
+**End-to-end tests** drive the real app in Chrome with [Playwright](https://playwright.dev): every view,
+error messages, CSV edge cases, cancelling a batch, the API key flow, phone layout, and an automated
+accessibility scan. They need Google Chrome installed (no browser download).
+
+```bash
+cd frontend
+npm run e2e          # starts its own API + UI on a fresh throwaway database (60 tests)
+npm run e2e:docker   # read-only checks against the running Docker stack on :8080
+```
 
 ## Database migrations
 

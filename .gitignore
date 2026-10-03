@@ -98,3 +98,10 @@ CLAUDE.md
 .claude/
 .agents/
 skills-lock.json
+
+# Playwright output
+frontend/test-results/
+frontend/playwright-report/
+
+# Product overview PDF: kept locally, not published
+docs/FraudGuard-Product-Overview.pdf

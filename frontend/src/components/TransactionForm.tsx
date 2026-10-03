@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from "react";
 import type { TransactionFormState } from "../hooks/useTransactionForm";
-import { parseTransactions } from "../lib/csv";
+import { describeMissing, parseTransactions } from "../lib/csv";
+import { formatAmount } from "../lib/format";
 import { SAMPLES } from "../samples";
 import { AMOUNT, type Features } from "../types";
 
@@ -21,10 +22,16 @@ export function TransactionForm({ form, busy, onRun }: TransactionFormProps) {
   return (
     <form className="panel check-form" onSubmit={submit} noValidate>
       <h1 className="view-title">Check a transaction</h1>
-      <p className="view-lede">Enter a card transaction, or start from a real one the model has never seen.</p>
+      <p className="view-lede">Choose a transaction from the dataset, then check it.</p>
       <SamplePicker onPick={form.fill} />
-      <PasteRow features={form.features} onFill={form.fill} />
-      <FieldGrid form={form} />
+      <div className="other-sources">
+        <PasteRow features={form.features} onFill={form.fill} />
+        <a className="btn btn-secondary" href="#batch">
+          Upload a CSV file
+        </a>
+      </div>
+      <AmountField form={form} />
+      <AdvancedFields form={form} />
       <div className="button-row form-actions">
         <button type="submit" className="btn btn-primary" disabled={busy !== null}>
           {busy === "check" ? "Checking…" : "Check transaction"}
@@ -63,7 +70,7 @@ function PasteRow({ features, onFill }: { features: string[]; onFill: (features:
 
   function fillFromText() {
     const { rows, missing } = parseTransactions(text, features);
-    if (missing.length > 0) return setError(`Couldn't find these columns: ${missing.join(", ")}.`);
+    if (missing.length > 0) return setError(describeMissing("That row", missing, features));
     if (rows.length === 0) return setError("That row has empty or non-numeric values.");
     setError(null);
     onFill(rows[0].features);
@@ -71,7 +78,7 @@ function PasteRow({ features, onFill }: { features: string[]; onFill: (features:
 
   return (
     <details className="paste-row">
-      <summary>Paste a row from a CSV file</summary>
+      <summary className="btn btn-secondary">Paste a dataset row</summary>
       <label htmlFor="paste-text" className="hint">
         A line from creditcard.csv works as is (Time, V1 to V28, Amount, Class). You can include the header line.
       </label>
@@ -84,35 +91,63 @@ function PasteRow({ features, onFill }: { features: string[]; onFill: (features:
   );
 }
 
-function FieldGrid({ form }: { form: TransactionFormState }) {
-  const amount = form.features.includes(AMOUNT) ? AMOUNT : form.features[0];
-  const anonymised = form.features.filter((name) => name !== amount);
-
+function AmountField({ form }: { form: TransactionFormState }) {
+  const { originalAmount, amountIsWhatIf } = form;
   return (
-    <div className="fields">
-      <Field name={amount} form={form} className="field field-amount" />
-      <fieldset className="field-grid">
-        <legend>Anonymised features</legend>
-        {anonymised.map((name) => (
-          <Field key={name} name={name} form={form} className="field" />
-        ))}
-      </fieldset>
+    <div className="field field-amount">
+      <label htmlFor={`f-${AMOUNT}`}>
+        Transaction amount
+        {amountIsWhatIf && <span className="tag tag-whatif">Amount what-if</span>}
+      </label>
+      <NumberInput name={AMOUNT} form={form} />
+      {originalAmount === null ? (
+        <p className="hint">Pick an example or paste a row to load a full transaction.</p>
+      ) : amountIsWhatIf ? (
+        <p className="hint">
+          Hypothetical: the record's own amount is {formatAmount(originalAmount)}. The 28 anonymised characteristics stay
+          as they are in the record.{" "}
+          <button type="button" className="btn-inline" onClick={form.resetAmount}>
+            Reset amount
+          </button>
+        </p>
+      ) : (
+        <p className="hint">From the selected record. Change it to see how the amount alone affects the score.</p>
+      )}
     </div>
   );
 }
 
-function Field({ name, form, className }: { name: string; form: TransactionFormState; className: string }) {
+function AdvancedFields({ form }: { form: TransactionFormState }) {
+  const anonymised = form.features.filter((name) => name !== AMOUNT);
   return (
-    <div className={className}>
-      <label htmlFor={`f-${name}`}>{name}</label>
-      <input
-        id={`f-${name}`}
-        type="number"
-        step="any"
-        inputMode="decimal"
-        value={form.values[name]}
-        onChange={(event) => form.setField(name, event.target.value)}
-      />
-    </div>
+    <details className="advanced">
+      <summary>Advanced: enter anonymised model features</summary>
+      <p className="hint">
+        V1 to V28 are anonymised characteristics from the source dataset; their real-world meanings aren't available.
+        Picking an example or pasting a row fills them in.
+      </p>
+      <fieldset className="field-grid">
+        <legend>Anonymised model features</legend>
+        {anonymised.map((name) => (
+          <div className="field" key={name}>
+            <label htmlFor={`f-${name}`}>{name}</label>
+            <NumberInput name={name} form={form} />
+          </div>
+        ))}
+      </fieldset>
+    </details>
+  );
+}
+
+function NumberInput({ name, form }: { name: string; form: TransactionFormState }) {
+  return (
+    <input
+      id={`f-${name}`}
+      type="number"
+      step="any"
+      inputMode="decimal"
+      value={form.values[name]}
+      onChange={(event) => form.setField(name, event.target.value)}
+    />
   );
 }

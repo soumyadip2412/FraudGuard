@@ -1,10 +1,9 @@
 import { useMemo } from "react";
-import type { BatchResult, ScoredRow } from "../hooks/useBatchScoring";
-import { downloadCsv, type Tally, tally, topRisks } from "../lib/batch";
+import type { BatchResult } from "../hooks/useBatchScoring";
+import { downloadCsv, TOP_RISKS, type Tally, tally, topRisks } from "../lib/batch";
 import { formatAmount, formatCount, formatPercent } from "../lib/format";
 import { DecisionTag } from "./DecisionTag";
 
-const TOP_N = 25;
 
 export function BatchResults({ result, onReset }: { result: BatchResult; onReset: () => void }) {
   const t = useMemo(() => tally(result.rows), [result]);
@@ -16,8 +15,12 @@ export function BatchResults({ result, onReset }: { result: BatchResult; onReset
         Flagged {formatCount(t.flagged)} of {formatCount(total)} transactions ({formatPercent(t.flagged / total)})
       </h2>
       {result.skipped > 0 && (
-        <p className="hint">{formatCount(result.skipped)} rows were skipped because they had empty or non-numeric values.</p>
+        <p className="hint">
+          {result.skipped === 1 ? "1 row was" : `${formatCount(result.skipped)} rows were`} skipped because{" "}
+          {result.skipped === 1 ? "it" : "they"} had empty or non-numeric values.
+        </p>
       )}
+      {!result.hasReasons && <p className="hint">Reasons couldn't be loaded for this file. The scores are unaffected.</p>}
       {result.hasLabels && <LabelComparison tally={t} />}
       <div className="button-row">
         <button type="button" className="btn btn-primary" onClick={() => downloadCsv(result)}>
@@ -27,7 +30,7 @@ export function BatchResults({ result, onReset }: { result: BatchResult; onReset
           Check another file
         </button>
       </div>
-      <TopRisks rows={result.rows} hasLabels={result.hasLabels} />
+      <TopRisks result={result} />
     </div>
   );
 }
@@ -70,8 +73,8 @@ function LabelComparison({ tally: t }: { tally: Tally }) {
   );
 }
 
-function TopRisks({ rows, hasLabels }: { rows: ScoredRow[]; hasLabels: boolean }) {
-  const top = useMemo(() => topRisks(rows, TOP_N), [rows]);
+function TopRisks({ result: { rows, hasLabels, hasReasons } }: { result: BatchResult }) {
+  const top = useMemo(() => topRisks(rows, TOP_RISKS), [rows]);
   return (
     <div className="table-scroll">
       <table className="ledger">
@@ -83,6 +86,7 @@ function TopRisks({ rows, hasLabels }: { rows: ScoredRow[]; hasLabels: boolean }
             <th scope="col" className="num">Fraud chance</th>
             <th scope="col">Decision</th>
             {hasLabels && <th scope="col">Actual</th>}
+            {hasReasons && <th scope="col">Reason</th>}
           </tr>
         </thead>
         <tbody>
@@ -93,6 +97,7 @@ function TopRisks({ rows, hasLabels }: { rows: ScoredRow[]; hasLabels: boolean }
               <td className="num">{formatPercent(row.probability)}</td>
               <td><DecisionTag flagged={row.flagged} /></td>
               {hasLabels && <td>{row.label === 1 ? "Fraud" : row.label === 0 ? "Legitimate" : "Unknown"}</td>}
+              {hasReasons && <td className="reason">{row.reason}</td>}
             </tr>
           ))}
         </tbody>

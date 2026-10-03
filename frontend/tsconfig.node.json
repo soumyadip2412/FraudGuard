@@ -1,0 +1,17 @@
+{
+  // Tooling that runs in Node (Vite config, Playwright config and tests), kept apart
+  // so browser code in src/ can't accidentally use Node globals like process.
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "noUnusedLocals": true,
+    "isolatedModules": true,
+    "skipLibCheck": true,
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": ["vite.config.ts", "playwright*.config.ts", "e2e"]
+}

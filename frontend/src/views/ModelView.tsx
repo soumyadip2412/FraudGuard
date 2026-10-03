@@ -40,12 +40,29 @@ export function ModelView({ model }: { model: ModelInfo }) {
         fraud but block more genuine customers.
       </p>
 
-      <h2 className="section-title">What it looks at</h2>
-      <p className="body-copy">
-        {model.features.length} inputs: the amount, plus V1 to V28, which the card issuer produced by transforming the
-        original details (a PCA) so customers can't be identified. The transaction time isn't used, because in this
-        dataset it only counts seconds from the first transaction.
-      </p>
+      <h2 className="section-title">About the data</h2>
+      <ul className="body-copy guide-list">
+        <li>Real card transactions by European cardholders over two days in September 2013 (the creditcard.csv dataset).</li>
+        <li>
+          The model uses {model.features.length} inputs: the <strong>transaction amount</strong>, plus{" "}
+          <strong>28 anonymised characteristics</strong> that the card issuer derived from the original details with a PCA so
+          customers can't be identified.
+        </li>
+        <li>
+          The anonymised characteristics can't be assigned real-world meanings: the original details and the mapping
+          weren't released. Explanations therefore treat them as one group.
+        </li>
+        <li>The transaction time isn't used, because in this dataset it only counts seconds from the first transaction.</li>
+      </ul>
+
+      <details className="technical">
+        <summary>Technical details</summary>
+        <p className="hint">
+          Imbalance handling: {model.imbalance_strategy ?? "default"}. Batch requests are limited to{" "}
+          {formatCount(model.max_batch_size)} transactions. Model inputs, in the order the model expects:
+        </p>
+        <p className="feature-list">{model.features.join(", ")}</p>
+      </details>
     </div>
   );
 }

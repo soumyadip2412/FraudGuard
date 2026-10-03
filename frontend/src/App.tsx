@@ -5,6 +5,7 @@ import { type ServerStatus, useServerStatus } from "./hooks/useServerStatus";
 import type { ModelInfo } from "./types";
 import { BatchView } from "./views/BatchView";
 import { CheckView } from "./views/CheckView";
+import { GuideView } from "./views/GuideView";
 import { LogView } from "./views/LogView";
 import { ModelView } from "./views/ModelView";
 
@@ -30,6 +31,8 @@ function ActiveView({ tab, model }: { tab: TabId; model: ModelInfo }) {
       return <LogView />;
     case "model":
       return <ModelView model={model} />;
+    case "guide":
+      return <GuideView model={model} />;
     default:
       return <CheckView model={model} />;
   }

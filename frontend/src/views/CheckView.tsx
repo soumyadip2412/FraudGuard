@@ -4,15 +4,17 @@ import { Notice } from "../components/Notice";
 import { type CheckAction, TransactionForm } from "../components/TransactionForm";
 import { Verdict } from "../components/Verdict";
 import { useTransactionForm } from "../hooks/useTransactionForm";
-import type { Features, ModelInfo, Prediction } from "../types";
+import { formatAmount } from "../lib/format";
+import { AMOUNT, type Features, type ModelInfo, type Prediction } from "../types";
 
 interface Outcome {
   run: number; // remounts the verdict so its reveal plays for every new result
   prediction: Prediction;
   recordedId: number | null;
+  whatIf: { original: number; used: number } | null; // set when the amount was edited after loading a record
 }
 
-async function score(action: CheckAction, features: Features): Promise<Omit<Outcome, "run">> {
+async function score(action: CheckAction, features: Features): Promise<Pick<Outcome, "prediction" | "recordedId">> {
   if (action === "record") {
     const stored = await api.record(features);
     return { prediction: stored, recordedId: stored.id };
@@ -33,7 +35,8 @@ export function CheckView({ model }: { model: ModelInfo }) {
     setError(null);
     try {
       const { prediction, recordedId } = await score(action, features);
-      setOutcome((previous) => ({ run: (previous?.run ?? 0) + 1, prediction, recordedId }));
+      const whatIf = form.amountIsWhatIf && form.originalAmount !== null ? { original: form.originalAmount, used: features[AMOUNT] } : null;
+      setOutcome((previous) => ({ run: (previous?.run ?? 0) + 1, prediction, recordedId, whatIf }));
     } catch (failure) {
       setError(errorMessage(failure));
     } finally {
@@ -55,6 +58,12 @@ export function CheckView({ model }: { model: ModelInfo }) {
 function Result({ outcome }: { outcome: Outcome }) {
   return (
     <Verdict key={outcome.run} prediction={outcome.prediction}>
+      {outcome.whatIf && (
+        <p className="whatif-note">
+          Amount what-if: scored with {formatAmount(outcome.whatIf.used)} instead of the record's {formatAmount(outcome.whatIf.original)}. The
+          anonymised characteristics are unchanged from the record.
+        </p>
+      )}
       {outcome.recordedId !== null && (
         <Notice tone="success">
           Recorded as transaction {outcome.recordedId}. <a href="#log">Open the log</a>
@@ -71,6 +80,9 @@ function EmptyResult() {
       <p className="body-copy">
         The verdict appears here, with the features that pushed the score toward or away from fraud. Try the caught
         fraud example to see a flagged one.
+      </p>
+      <p className="body-copy">
+        New here? <a href="#guide">Read the guide</a> for how to read a verdict.
       </p>
     </div>
   );
