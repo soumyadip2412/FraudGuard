@@ -1,3 +1,4 @@
+import math
 import os
 import tempfile
 
@@ -61,7 +62,39 @@ def test_predict_flags_fraud_with_reasons(client, rows):
 
 def test_predict_legit_without_explanation(client, rows):
     body = client.post("/predictions?explain=false", json=rows["legit"]).json()
-    assert not body["is_fraud"] and body["top_features"] is None
+    assert not body["is_fraud"] and body["top_features"] is None and body["explanation"] is None
+
+
+def test_existing_response_fields_are_unchanged(client, rows):
+    body = client.post("/predictions", json=rows["fraud"]).json()
+    assert {"fraud_probability", "is_fraud", "threshold", "model", "base_value", "top_features"} <= body.keys()
+    assert all(set(f) == {"feature", "value", "contribution"} for f in body["top_features"])
+
+
+def test_prediction_includes_explanation(client, rows):
+    body = client.post("/predictions", json=rows["fraud"]).json()
+    explanation = body["explanation"]
+    assert set(explanation) == {"amount", "anonymised", "unusualness", "technical", "reference"}
+    assert explanation["amount"]["value"] == rows["fraud"]["Amount"]
+    group = explanation["anonymised"]
+    assert group["raised_count"] + group["lowered_count"] <= 28
+    assert 0 <= explanation["unusualness"]["percentile"] <= 100
+    # Technical detail mirrors the existing top_features, plus odds and percentile.
+    technical = explanation["technical"]
+    assert technical["base_value"] == body["base_value"]
+    assert [(f["feature"], f["contribution"]) for f in technical["top_features"]] == [
+        (f["feature"], f["contribution"]) for f in body["top_features"]
+    ]
+    # SHAP additivity: base + amount + anonymised group = the model's log-odds.
+    log_odds = technical["base_value"] + explanation["amount"]["contribution"] + group["combined_contribution"]
+    assert 1 / (1 + math.exp(-log_odds)) == pytest.approx(body["fraud_probability"], abs=1e-4)
+
+
+def test_recorded_transaction_keeps_its_explanation(client, rows):
+    created = client.post("/transactions", json=rows["legit"]).json()
+    assert created["explanation"]["amount"]["value"] == rows["legit"]["Amount"]
+    fetched = client.get(f"/transactions/{created['id']}").json()
+    assert fetched["explanation"] == created["explanation"]
 
 
 @pytest.mark.parametrize("change", [{"Amount": -5}, {"V3": None}, {"V3": "abc"}])

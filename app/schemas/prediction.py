@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field, create_model
 
@@ -25,6 +26,65 @@ class FeatureContribution(BaseModel):
     contribution: float
 
 
+Direction = Literal["raised", "lowered", "unchanged"]
+Strength = Literal["negligible", "slight", "moderate", "strong"]
+
+
+class AmountExplanation(BaseModel):
+    value: float
+    percentile: float  # 0-100, among legitimate training transactions
+    contribution: float  # SHAP, log-odds
+    direction: Direction
+    odds_multiplier: float  # exp(contribution): factor applied to the odds, not the probability
+    strength: Strength
+
+
+class AnonymisedExplanation(BaseModel):
+    """V1-V28 as one group: their individual meanings are unknown (anonymised by PCA)."""
+
+    combined_contribution: float
+    direction: Direction
+    odds_multiplier: float
+    strength: Strength
+    raised_count: int
+    lowered_count: int
+    extreme_count: int
+
+
+class UnusualnessExplanation(BaseModel):
+    """How the inputs compare with legitimate training transactions. Unusual is not fraud."""
+
+    percentile: float  # share of legitimate training transactions MORE typical than this one
+    comparison_group: str
+    extreme_feature_count: int
+    rarity_threshold: float
+    summary: str
+
+
+class TechnicalFeature(FeatureContribution):
+    odds_multiplier: float
+    percentile: float
+
+
+class TechnicalExplanation(BaseModel):
+    base_value: float
+    top_features: list[TechnicalFeature]
+    feature_percentiles: dict[str, float]
+
+
+class ExplanationReference(BaseModel):
+    dataset_description: str
+    model_version: str
+
+
+class ExplanationOut(BaseModel):
+    amount: AmountExplanation
+    anonymised: AnonymisedExplanation
+    unusualness: UnusualnessExplanation
+    technical: TechnicalExplanation
+    reference: ExplanationReference
+
+
 class PredictionOut(BaseModel):
     fraud_probability: float
     is_fraud: bool
@@ -32,6 +92,8 @@ class PredictionOut(BaseModel):
     model: str
     base_value: float | None = None
     top_features: list[FeatureContribution] | None = None
+    # New and optional: absent with ?explain=false or for models without reference statistics.
+    explanation: ExplanationOut | None = None
 
 
 class TransactionOut(PredictionOut):

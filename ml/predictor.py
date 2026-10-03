@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 
 from ml.src.preprocessing import validate_input
+from ml.src.reference import ReferenceStats
 from ml.src.train import ARTIFACTS_DIR
 
 
@@ -30,6 +31,10 @@ class FraudPredictor:
         self.features = self.metadata["features"]
         self.threshold = self.metadata["threshold"]
         self.model_name = self.metadata["model"]
+        self.model_version = f"{self.model_name} trained {self.metadata.get('trained_at', 'unknown')}"
+        # Reference statistics for explanations; None for models trained before they existed.
+        reference_file = self.metadata.get("reference_stats")
+        self.reference = ReferenceStats.load(ARTIFACTS_DIR / reference_file) if reference_file else None
 
     def to_frame(self, transactions):
         if isinstance(transactions, pd.DataFrame):

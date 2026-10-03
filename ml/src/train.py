@@ -13,6 +13,7 @@ from xgboost import XGBClassifier
 from ml.src.data import RANDOM_STATE, load_splits
 from ml.src.evaluate import best_f1_threshold, evaluate
 from ml.src.preprocessing import FEATURES, build_preprocessor, get_xy
+from ml.src.reference import REFERENCE_FILE, ReferenceStats
 
 ARTIFACTS_DIR = Path(__file__).resolve().parents[1] / "artifacts"
 
@@ -100,9 +101,10 @@ def artifact_prefix(models):
     return "" if set(models) == set(MODELS) else "_".join(models) + "_"
 
 
-def save(pipeline, threshold, name, strategy, params, val_metrics, test_metrics, prefix=""):
+def save(pipeline, threshold, name, strategy, params, val_metrics, test_metrics, reference, prefix=""):
     ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
     joblib.dump(pipeline, ARTIFACTS_DIR / f"{prefix}model.joblib")
+    reference.save(ARTIFACTS_DIR / f"{prefix}{REFERENCE_FILE}")
     metadata = {
         "model": name,
         "params": params,
@@ -113,6 +115,8 @@ def save(pipeline, threshold, name, strategy, params, val_metrics, test_metrics,
         "trained_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "val_metrics": val_metrics,
         "test_metrics": test_metrics,
+        # Legitimate training transactions, used to describe how unusual inputs are.
+        "reference_stats": f"{prefix}{REFERENCE_FILE}",
     }
     (ARTIFACTS_DIR / f"{prefix}metadata.json").write_text(json.dumps(metadata, indent=2))
 
@@ -140,7 +144,8 @@ def main(models=MODELS):
     print("Test:", {k: round(v, 4) if isinstance(v, float) else v for k, v in test_metrics.items()})
 
     val_metrics = {k: best[k] for k in test_metrics}
-    save(pipeline, threshold, best["model"], best["strategy"], json.loads(best["params"]), val_metrics, test_metrics, prefix)
+    reference = ReferenceStats.build(train)  # training split only: no val/test leakage
+    save(pipeline, threshold, best["model"], best["strategy"], json.loads(best["params"]), val_metrics, test_metrics, reference, prefix)
     print(f"Saved model and metadata to {ARTIFACTS_DIR}")
 
 

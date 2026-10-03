@@ -29,3 +29,5 @@ class Transaction(Base):
     model: Mapped[str] = mapped_column(String(50))
     base_value: Mapped[float | None]
     top_features: Mapped[list | None] = mapped_column(JsonColumn)
+    # The explanation shown at decision time, kept like threshold/model so old decisions stay auditable.
+    explanation: Mapped[dict | None] = mapped_column(JsonColumn)
