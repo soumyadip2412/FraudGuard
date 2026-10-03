@@ -1,0 +1,15 @@
+.git
+.venv
+.env
+.claude
+**/__pycache__
+.pytest_cache
+*.db
+ml/data
+ml/artifacts
+ml/notebooks
+frontend
+tests
+CLAUDE.md
+node_modules
+dist

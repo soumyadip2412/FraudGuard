@@ -1,0 +1,1053 @@
+/* FraudGuard. Neutral base of soft grays and white; deep gold and black carry meaning:
+   gold = toward fraud / the flagging threshold, black = structure and the final verdict. */
+
+:root {
+  --white: #ffffff;
+  --mist: #ecedef;
+  --pewter: #c9cbd0;
+  --bar-gray: #a3a6ac;
+  --slate: #61646b;
+  --gold: #85651c; /* text and lines: 5.4:1 on white */
+  --gold-leaf: #b08a35; /* fills: 6.5:1 against black */
+  --black: #000000;
+
+  --font-display: "Brygada 1918", Georgia, "Times New Roman", serif;
+  --font-body: "Public Sans", "Segoe UI", system-ui, sans-serif;
+
+  /* Major-third scale (1.25) on a 16px base. */
+  --step--1: 0.8125rem;
+  --step-0: 1rem;
+  --step-1: 1.25rem;
+  --step-2: 1.5625rem;
+  --step-3: 1.953rem;
+  --step-4: 2.441rem;
+
+  --radius-panel: 6px;
+  --radius-control: 3px;
+  --gutter: 16px;
+}
+
+@media (min-width: 720px) {
+  :root {
+    --gutter: 32px;
+  }
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--mist);
+  color: var(--black);
+  font: 400 var(--step-0) / 1.55 var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+p,
+dl,
+dd,
+figure {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-underline-offset: 0.18em;
+}
+
+code {
+  font-family: ui-monospace, "Cascadia Code", Consolas, monospace;
+  font-size: 0.875em;
+  background: var(--white);
+  padding: 0.1em 0.35em;
+  border-radius: var(--radius-control);
+}
+
+:focus-visible {
+  outline: 2px solid var(--gold-leaf);
+  outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* ---------- Top bar ---------- */
+
+.topbar {
+  background: var(--black);
+  color: var(--white);
+}
+
+.skip-link {
+  position: absolute;
+  left: var(--gutter);
+  top: -3rem;
+  background: var(--white);
+  color: var(--black);
+  padding: 0.5rem 0.75rem;
+  z-index: 10;
+}
+
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+.topbar-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 var(--gutter);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0 2rem;
+  min-height: 3.75rem;
+}
+
+.wordmark {
+  font: 600 var(--step-1) / 1 var(--font-display);
+  letter-spacing: 0.01em;
+  text-decoration: none;
+  color: var(--white);
+}
+
+.tabs {
+  display: flex;
+  gap: 0.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tabs a {
+  display: block;
+  padding: 1.15rem 0.75rem;
+  color: var(--pewter);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.tabs a:hover {
+  color: var(--white);
+}
+
+.tabs a[aria-current="page"] {
+  color: var(--white);
+  box-shadow: inset 0 -3px 0 var(--gold-leaf);
+}
+
+.topbar-tools {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 0;
+}
+
+.server-state {
+  color: var(--pewter);
+  font-size: var(--step--1);
+}
+
+.server-state.is-down {
+  color: var(--gold-leaf);
+}
+
+.key-control {
+  position: relative;
+}
+
+.key-control summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: var(--step--1);
+  font-weight: 500;
+  padding: 0.35rem 0.7rem;
+  border: 1px solid var(--slate);
+  border-radius: var(--radius-control);
+}
+
+.key-control summary::-webkit-details-marker {
+  display: none;
+}
+
+.key-control[open] summary {
+  border-color: var(--white);
+}
+
+.key-popover {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 0.5rem);
+  z-index: 5;
+  width: min(20rem, calc(100vw - 2 * var(--gutter)));
+  background: var(--white);
+  color: var(--black);
+  border: 1px solid var(--black);
+  border-radius: var(--radius-panel);
+  padding: 1rem;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.key-popover label {
+  font-weight: 600;
+}
+
+@media (max-width: 719px) {
+  .topbar-inner {
+    gap: 0 1rem;
+    padding-top: 0.5rem;
+  }
+  .tabs {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+  }
+  .tabs a {
+    padding: 0.75rem 0.6rem;
+  }
+  .server-state {
+    display: none;
+  }
+}
+
+/* ---------- Page and type ---------- */
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 2rem var(--gutter) 4rem;
+}
+
+.narrow {
+  max-width: 44rem;
+}
+
+.narrow-wide {
+  max-width: 60rem;
+}
+
+.view-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.view-title {
+  font: 600 var(--step-3) / 1.15 var(--font-display);
+  margin-bottom: 0.5rem;
+}
+
+.view-lede {
+  color: var(--slate);
+  max-width: 62ch;
+  margin-bottom: 1.5rem;
+}
+
+.section-title {
+  font: 600 var(--step-1) / 1.3 var(--font-display);
+  margin: 2.25rem 0 0.5rem;
+}
+
+.body-copy {
+  max-width: 68ch;
+  margin-bottom: 1rem;
+}
+
+.hint {
+  color: var(--slate);
+  font-size: var(--step--1);
+  line-height: 1.45;
+}
+
+.loading-line {
+  color: var(--slate);
+}
+
+.num,
+.ladder,
+.fact-value,
+.ledger,
+.matrix {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- Controls ---------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  font: 500 0.9375rem / 1.2 var(--font-body);
+  padding: 0.65rem 1.05rem;
+  border: 1px solid transparent;
+  border-radius: var(--radius-control);
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--black);
+  color: var(--white);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--gold);
+}
+
+.btn-secondary {
+  background: var(--white);
+  border-color: var(--black);
+  color: var(--black);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--mist);
+}
+
+.btn-quiet {
+  background: none;
+  color: var(--black);
+  padding-inline: 0.4rem;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.button-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+input,
+textarea {
+  font: inherit;
+  color: var(--black);
+  background: var(--white);
+  border: 1px solid var(--pewter);
+  border-radius: var(--radius-control);
+  padding: 0.45rem 0.55rem;
+  width: 100%;
+}
+
+input:hover,
+textarea:hover {
+  border-color: var(--slate);
+}
+
+textarea {
+  resize: vertical;
+  font-size: var(--step--1);
+}
+
+.notice {
+  background: var(--white);
+  border-left: 3px solid var(--black);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.notice-success {
+  border-left-color: var(--gold-leaf);
+}
+
+.field-error {
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.panel {
+  background: var(--white);
+  border: 1px solid var(--pewter);
+  border-radius: var(--radius-panel);
+  padding: 1.5rem;
+}
+
+/* ---------- Check ---------- */
+
+.check-layout {
+  display: grid;
+  gap: 1.5rem;
+}
+
+@media (min-width: 1040px) {
+  .check-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    align-items: start;
+  }
+  .check-result {
+    position: sticky;
+    top: 1.5rem;
+  }
+}
+
+.check-form {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.check-form .view-lede {
+  margin-bottom: 0;
+}
+
+.samples,
+.field-grid {
+  border: 0;
+  padding: 0;
+  margin: 0;
+  min-width: 0;
+}
+
+.samples legend,
+.field-grid legend {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  padding: 0;
+}
+
+.sample-list {
+  display: grid;
+  gap: 0.5rem;
+}
+
+@media (min-width: 560px) {
+  .sample-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+.sample {
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  font: inherit;
+  background: var(--white);
+  border: 1px solid var(--pewter);
+  border-left-width: 3px;
+  border-radius: var(--radius-control);
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+}
+
+/* Gold edge marks the examples that are real frauds. */
+.sample.is-caught,
+.sample.is-missed {
+  border-left-color: var(--gold-leaf);
+}
+
+.sample:hover {
+  border-color: var(--black);
+}
+
+.sample-label {
+  font-weight: 600;
+}
+
+.sample-note {
+  font-size: var(--step--1);
+  color: var(--slate);
+  line-height: 1.4;
+}
+
+.paste-row {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.paste-row summary {
+  cursor: pointer;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+  width: fit-content;
+}
+
+.paste-row[open] {
+  display: grid;
+  gap: 0.6rem;
+}
+
+.paste-row .btn {
+  justify-self: start;
+}
+
+.fields {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.field {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.field label {
+  font-size: var(--step--1);
+  color: var(--slate);
+}
+
+.field-amount label {
+  font-weight: 600;
+  color: var(--black);
+  font-size: var(--step-0);
+}
+
+.field-amount input {
+  max-width: 14rem;
+  font-size: var(--step-1);
+  padding: 0.5rem 0.65rem;
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.6rem 0.75rem;
+}
+
+@media (min-width: 560px) {
+  .field-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.field-grid legend {
+  grid-column: 1 / -1;
+}
+
+.field-grid input {
+  font-size: var(--step--1);
+  padding: 0.35rem 0.45rem;
+}
+
+.form-actions {
+  padding-top: 0.25rem;
+}
+
+/* ---------- Verdict and evidence ladder ---------- */
+
+.verdict,
+.verdict-empty {
+  background: var(--white);
+  border: 1px solid var(--pewter);
+  border-top: 4px solid var(--black);
+  border-radius: var(--radius-panel);
+  padding: 1.5rem;
+}
+
+.verdict.is-flagged {
+  border-top-color: var(--gold-leaf);
+}
+
+.verdict-empty {
+  border-top-color: var(--pewter);
+}
+
+.verdict-headline {
+  font: 700 var(--step-4) / 1.05 var(--font-display);
+  margin-bottom: 0.5rem;
+}
+
+.verdict.is-flagged .verdict-headline {
+  color: var(--gold);
+}
+
+.verdict-empty .verdict-headline {
+  font-size: var(--step-2);
+  color: var(--slate);
+}
+
+.verdict-summary {
+  font-size: var(--step-1);
+  line-height: 1.4;
+  max-width: 40ch;
+  margin-bottom: 1.5rem;
+}
+
+.ladder {
+  --label-col: minmax(6.5rem, 9.5rem);
+  --delta-col: 3.75rem;
+}
+
+.ladder-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.ladder-row,
+.ladder-axis {
+  display: grid;
+  grid-template-columns: var(--label-col) minmax(0, 1fr) var(--delta-col);
+  align-items: center;
+  column-gap: 0.75rem;
+}
+
+.ladder-label {
+  font-weight: 600;
+  line-height: 1.2;
+  display: grid;
+}
+
+.ladder-detail {
+  font-weight: 400;
+  font-size: var(--step--1);
+  color: var(--slate);
+}
+
+.ladder-track {
+  position: relative;
+  height: 2.75rem;
+}
+
+/* The flagging threshold: one continuous gold rule down every row. */
+.ladder-track::before,
+.ladder-axis-track::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: var(--threshold);
+  border-left: 2px solid var(--gold-leaf);
+}
+
+.ladder-bar {
+  position: absolute;
+  top: calc(50% - 0.45rem);
+  height: 0.9rem;
+  border-radius: 2px;
+}
+
+.is-up .ladder-bar {
+  background: var(--gold-leaf);
+  transform-origin: left center;
+}
+
+.is-down .ladder-bar {
+  background: var(--bar-gray);
+  transform-origin: right center;
+}
+
+.ladder-marker {
+  position: absolute;
+  top: 50%;
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: -0.45rem 0 0 -0.45rem;
+  border-radius: 50%;
+  border: 2px solid var(--black);
+  background: var(--white);
+}
+
+.is-end .ladder-marker {
+  width: 1.15rem;
+  height: 1.15rem;
+  margin: -0.575rem 0 0 -0.575rem;
+  background: var(--black);
+}
+
+/* Ledger convention: a double rule above the total. */
+.ladder-row.is-end {
+  border-top: 3px double var(--black);
+  margin-top: 0.25rem;
+}
+
+.ladder-delta {
+  text-align: right;
+  font-size: var(--step--1);
+  font-weight: 600;
+}
+
+.is-up .ladder-delta {
+  color: var(--gold);
+}
+
+.is-down .ladder-delta {
+  color: var(--slate);
+}
+
+.ladder-axis-track::before {
+  bottom: 1.5rem; /* stop above the threshold label */
+}
+
+.ladder-axis-track {
+  position: relative;
+  grid-column: 2;
+  height: 3rem;
+  border-top: 1px solid var(--pewter);
+}
+
+.ladder-tick {
+  position: absolute;
+  top: 0.35rem;
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  color: var(--slate);
+  white-space: nowrap;
+}
+
+.ladder-threshold-label {
+  position: absolute;
+  top: 1.65rem;
+  left: var(--threshold);
+  transform: translateX(-50%);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--gold);
+  white-space: nowrap;
+  background: var(--white);
+  padding: 0 0.25rem;
+}
+
+.ladder-key {
+  margin-top: 1rem;
+  max-width: 68ch;
+  color: var(--slate);
+  font-size: var(--step--1);
+}
+
+.verdict .notice {
+  margin: 1.25rem 0 0;
+  background: var(--mist);
+}
+
+.verdict .hint {
+  margin-top: 0.75rem;
+}
+
+@media (max-width: 559px) {
+  .ladder {
+    --label-col: 5.75rem;
+    --delta-col: 3rem;
+  }
+  .ladder-tick.is-minor {
+    display: none;
+  }
+  .verdict,
+  .verdict-empty,
+  .panel {
+    padding: 1.15rem;
+  }
+}
+
+/* The one orchestrated moment: the evidence is laid out step by step when a verdict arrives. */
+@media (prefers-reduced-motion: no-preference) {
+  .ladder-row {
+    animation: ladder-row-in 320ms ease-out both;
+    animation-delay: calc(var(--i) * 90ms);
+  }
+  .is-up .ladder-bar,
+  .is-down .ladder-bar {
+    animation: ladder-bar-grow 460ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i) * 90ms + 60ms);
+  }
+}
+
+@keyframes ladder-row-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes ladder-bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+/* ---------- Tables ---------- */
+
+.table-scroll {
+  overflow-x: auto;
+  background: var(--white);
+  border: 1px solid var(--pewter);
+  border-radius: var(--radius-panel);
+  margin-top: 1rem;
+}
+
+.ledger {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.ledger caption {
+  text-align: left;
+  font: 600 var(--step-1) / 1.3 var(--font-display);
+  padding: 1rem 0.9rem 0.5rem;
+}
+
+.ledger th {
+  text-align: left;
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--slate);
+  padding: 0.6rem 0.9rem;
+  border-bottom: 2px solid var(--black);
+  white-space: nowrap;
+}
+
+.ledger td {
+  padding: 0.6rem 0.9rem;
+  border-bottom: 1px solid var(--pewter);
+  white-space: nowrap;
+}
+
+.ledger tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.ledger .num {
+  text-align: right;
+}
+
+.row-toggle {
+  font: inherit;
+  font-weight: 600;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 0.2em;
+}
+
+.row-toggle[aria-expanded="true"] {
+  text-decoration-color: var(--gold-leaf);
+  text-decoration-thickness: 2px;
+}
+
+.ledger tr.is-open td,
+.row-detail td {
+  background: var(--mist);
+}
+
+.row-detail td {
+  white-space: normal;
+  padding: 0.5rem 0.9rem 1.25rem;
+}
+
+.row-detail .verdict-headline {
+  font-size: var(--step-3);
+}
+
+.tag {
+  display: inline-block;
+  font-size: var(--step--1);
+  font-weight: 600;
+  padding: 0.1rem 0.55rem;
+  border-radius: 999px;
+}
+
+.tag-flagged {
+  background: var(--gold-leaf);
+  color: var(--black);
+}
+
+.tag-cleared {
+  border: 1px solid var(--pewter);
+  color: var(--slate);
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid var(--black);
+  border-radius: var(--radius-control);
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+
+.segmented button {
+  font: 500 var(--step--1) / 1 var(--font-body);
+  padding: 0.55rem 0.95rem;
+  background: var(--white);
+  color: var(--black);
+  border: 0;
+  cursor: pointer;
+}
+
+.segmented button + button {
+  border-left: 1px solid var(--black);
+}
+
+.segmented button[aria-checked="true"] {
+  background: var(--black);
+  color: var(--white);
+}
+
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.empty {
+  background: var(--white);
+  border: 1px dashed var(--bar-gray);
+  border-radius: var(--radius-panel);
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+/* ---------- Batch ---------- */
+
+.dropzone {
+  display: grid;
+  justify-items: start;
+  gap: 0.75rem;
+  background: var(--white);
+  border: 1.5px dashed var(--bar-gray);
+  border-radius: var(--radius-panel);
+  padding: 2rem 1.5rem;
+  cursor: pointer;
+}
+
+.dropzone:hover,
+.dropzone.is-dragging {
+  border-color: var(--gold-leaf);
+}
+
+.dropzone:focus-within {
+  outline: 2px solid var(--gold-leaf);
+  outline-offset: 2px;
+}
+
+.progress-block {
+  display: grid;
+  justify-items: start;
+  gap: 0.6rem;
+  max-width: 34rem;
+}
+
+.progress {
+  appearance: none;
+  width: 100%;
+  height: 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: var(--pewter);
+  overflow: hidden;
+}
+
+.progress::-webkit-progress-bar {
+  background: var(--pewter);
+}
+
+.progress::-webkit-progress-value {
+  background: var(--gold-leaf);
+}
+
+.progress::-moz-progress-bar {
+  background: var(--gold-leaf);
+}
+
+.batch-results {
+  display: grid;
+  gap: 1rem;
+}
+
+.batch-results .section-title {
+  margin-top: 0;
+  font-size: var(--step-2);
+}
+
+.comparison {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.matrix {
+  border-collapse: collapse;
+  background: var(--white);
+  border: 1px solid var(--pewter);
+}
+
+.matrix caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+}
+
+.matrix th,
+.matrix td {
+  padding: 0.6rem 1rem;
+  border: 1px solid var(--pewter);
+  text-align: left;
+}
+
+.matrix thead th {
+  font-size: var(--step--1);
+  color: var(--slate);
+}
+
+.matrix .is-bad {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* ---------- Model ---------- */
+
+.facts {
+  display: grid;
+  gap: 1.25rem 2rem;
+  margin: 1rem 0 0.5rem;
+}
+
+@media (min-width: 560px) {
+  .facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.fact {
+  border-top: 1px solid var(--black);
+  padding-top: 0.6rem;
+}
+
+.fact dt {
+  font-size: var(--step--1);
+  font-weight: 600;
+  color: var(--slate);
+}
+
+.fact-value {
+  font: 600 var(--step-3) / 1.2 var(--font-display);
+}
+
+.fact-note {
+  font-size: var(--step--1);
+  color: var(--slate);
+  line-height: 1.45;
+}
+
+@media (max-width: 559px) {
+  .wide-only {
+    display: none;
+  }
+}
+
+@media (max-width: 559px) {
+  .ledger th,
+  .ledger td {
+    padding-inline: 0.5rem;
+  }
+}
